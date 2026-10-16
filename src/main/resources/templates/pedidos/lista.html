@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Pedidos</title>
+</head>
+<body>
+
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-bag me-2 text-primary"></i>Pedidos
+        </h2>
+        <a th:href="@{/pedidos/novo}" class="btn btn-primary" sec:authorize="hasAnyRole('GERENTE','ATENDENTE')">
+            <i class="bi bi-plus-lg me-1"></i> Novo pedido
+        </a>
+    </div>
+
+    <!-- Filtro por status -->
+    <div class="mb-3 d-flex flex-wrap gap-1">
+        <a th:href="@{/pedidos}" class="btn btn-sm"
+           th:classappend="${statusFiltro == null} ? 'btn-dark' : 'btn-outline-dark'">Todos</a>
+        <a th:each="s : ${todosStatus}" th:href="@{/pedidos(status=${s})}" class="btn btn-sm"
+           th:classappend="${statusFiltro == s} ? 'btn-dark' : 'btn-outline-dark'"
+           th:text="${s.rotulo}"></a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Pedido</th>
+                        <th>Entrada</th>
+                        <th>Cliente</th>
+                        <th>Tipo</th>
+                        <th class="text-end">Total</th>
+                        <th>Status</th>
+                        <th>Registrado por</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(pedidos)}">
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                            Nenhum pedido encontrado.
+                        </td>
+                    </tr>
+                    <tr th:each="pedido : ${pedidos}">
+                        <td class="ps-4 fw-semibold" th:text="'#' + ${pedido.codigo}"></td>
+                        <td class="small" th:text="${@fmt.dataHora(pedido.entradaEm)}"></td>
+                        <td th:text="${pedido.clienteNome}"></td>
+                        <td class="small" th:text="${pedido.tipoAtendimento?.rotulo}"></td>
+                        <td class="text-end" th:text="${@fmt.moeda(pedido.valorTotal)}"></td>
+                        <td><span th:replace="~{pedidos/detalhe :: selo(${pedido.status})}"></span></td>
+                        <td class="small" th:text="${pedido.registradoPor}"></td>
+                        <td class="text-end pe-3">
+                            <a th:href="@{/pedidos/{id}(id=${pedido.id})}" class="btn btn-sm btn-outline-primary">Abrir</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer text-muted small" th:if="${!#lists.isEmpty(pedidos)}">
+            Total: <strong th:text="${#lists.size(pedidos)}"></strong> pedido(s)
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

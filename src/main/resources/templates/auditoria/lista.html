@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Auditoria</title>
+</head>
+<body>
+
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0"><i class="bi bi-journal-text me-2 text-primary"></i>Auditoria</h2>
+        <span class="text-muted small">Somente leitura · um registro por campo alterado</span>
+    </div>
+
+    <!-- Filtros (GET: não altera nada) -->
+    <form class="row g-2 mb-3" th:action="@{/auditoria}" method="get">
+        <div class="col-md-3">
+            <input type="text" name="usuario" class="form-control form-control-sm" placeholder="Usuário"
+                   th:value="${fUsuario}">
+        </div>
+        <div class="col-md-3">
+            <select name="tipo" class="form-select form-select-sm">
+                <option value="">Todas as operações</option>
+                <option th:each="t : ${tipos}" th:value="${t}" th:text="${t.rotulo}"
+                        th:selected="${fTipo == t}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="entidade" class="form-select form-select-sm">
+                <option value="">Todas as entidades</option>
+                <option th:each="e : ${entidades}" th:value="${e}" th:text="${e}"
+                        th:selected="${fEntidade == e}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="entidadeId" class="form-control form-control-sm" placeholder="Id da entidade"
+                   th:value="${fEntidadeId}">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button class="btn btn-sm btn-dark flex-fill" type="submit"><i class="bi bi-funnel"></i> Filtrar</button>
+            <a class="btn btn-sm btn-outline-secondary" th:href="@{/auditoria}" title="Limpar"><i class="bi bi-x"></i></a>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-sm table-hover mb-0 small tabela-auditoria">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3">Data e hora</th>
+                        <th>Usuário</th>
+                        <th>Operação</th>
+                        <th>Entidade</th>
+                        <th>Campo</th>
+                        <th>Valor anterior</th>
+                        <th>Novo valor</th>
+                        <th>Justificativa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${eventos.empty}">
+                        <td colspan="8" class="text-center text-muted py-4">Nenhum registro encontrado.</td>
+                    </tr>
+                    <tr th:each="e : ${eventos.content}">
+                        <td class="ps-3 text-nowrap" th:text="${@fmt.dataHora(e.dataHora)}"></td>
+                        <td>
+                            <span th:text="${e.usuario}"></span>
+                            <span class="badge bg-secondary" th:text="${e.perfil}"></span>
+                        </td>
+                        <td th:text="${e.tipoOperacao?.rotulo}"></td>
+                        <td>
+                            <span th:text="${e.entidade}"></span>
+                            <a th:if="${e.entidade == 'Pedido'}" th:href="@{/pedidos/{id}(id=${e.entidadeId})}"
+                               class="text-decoration-none" th:text="'#' + ${@fmt.codigo(e.entidadeId)}"></a>
+                            <code th:unless="${e.entidade == 'Pedido'}" class="small" th:text="${e.entidadeId}"></code>
+                        </td>
+                        <td class="fw-semibold" th:text="${e.campo}"></td>
+                        <td class="valor-antigo" th:text="${e.valorAnterior}"></td>
+                        <td class="valor-novo" th:text="${e.valorNovo}"></td>
+                        <td th:text="${e.justificativa}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center small" th:if="${eventos.totalPages > 1}">
+            <span class="text-muted">
+                Página <span th:text="${eventos.number + 1}"></span> de <span th:text="${eventos.totalPages}"></span>
+                (<span th:text="${eventos.totalElements}"></span> registros)
+            </span>
+            <div class="d-flex gap-1">
+                <a class="btn btn-sm btn-outline-dark" th:if="${eventos.hasPrevious()}"
+                   th:href="@{/auditoria(usuario=${fUsuario}, tipo=${fTipo}, entidade=${fEntidade}, entidadeId=${fEntidadeId}, pagina=${eventos.number - 1})}">Anterior</a>
+                <a class="btn btn-sm btn-outline-dark" th:if="${eventos.hasNext()}"
+                   th:href="@{/auditoria(usuario=${fUsuario}, tipo=${fTipo}, entidade=${fEntidade}, entidadeId=${fEntidadeId}, pagina=${eventos.number + 1})}">Próxima</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

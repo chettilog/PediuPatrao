@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Usuário</title>
+</head>
+<body>
+
+<div th:fragment="content">
+
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="/usuarios" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="fw-bold mb-0">
+            <span th:text="${idEmEdicao != null} ? 'Editar Usuário' : 'Novo Usuário'"></span>
+        </h2>
+    </div>
+
+    <div class="card shadow-sm" style="max-width: 540px;">
+        <div class="card-body p-4">
+
+            <!-- th:action gera automaticamente o campo oculto com o token CSRF -->
+            <form th:action="${idEmEdicao != null}
+                        ? @{/usuarios/editar/{id}(id=${idEmEdicao})}
+                        : @{/usuarios/salvar}"
+                  th:object="${usuarioForm}"
+                  method="post">
+
+                <div class="mb-3">
+                    <label for="username" class="form-label fw-medium">
+                        <i class="bi bi-person me-1"></i>Username
+                    </label>
+                    <input type="text" id="username" class="form-control" th:field="*{username}"
+                           placeholder="Ex: joao.silva" required/>
+                </div>
+
+                <div class="mb-3">
+                    <label for="senha" class="form-label fw-medium">
+                        <i class="bi bi-lock me-1"></i>Senha
+                        <small class="text-muted fw-normal" th:if="${idEmEdicao != null}">
+                            — deixe em branco para manter a atual
+                        </small>
+                    </label>
+                    <div class="input-group">
+                        <!-- a senha nunca é preenchida de volta na tela -->
+                        <input type="password" id="senha" name="senha" class="form-control"
+                               placeholder="mínimo 6 caracteres" autocomplete="new-password"
+                               th:required="${idEmEdicao == null}"/>
+                        <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="perfil" class="form-label fw-medium">
+                        <i class="bi bi-shield me-1"></i>Perfil
+                    </label>
+                    <select id="perfil" class="form-select" th:field="*{perfil}" required>
+                        <option value="" disabled>Selecione um perfil</option>
+                        <option th:each="p : ${perfis}" th:value="${p}" th:text="${p} + ' — ' + ${p.rotulo}"></option>
+                    </select>
+                    <div class="form-text">Somente o ADMIN acessa esta tela. Você não pode alterar o seu próprio perfil.</div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        <span th:text="${idEmEdicao != null} ? 'Salvar Alterações' : 'Criar Usuário'"></span>
+                    </button>
+                    <a href="/usuarios" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const input = document.getElementById('senha');
+            const icon = document.getElementById('eyeIcon');
+            const mostrar = input.type === 'password';
+            input.type = mostrar ? 'text' : 'password';
+            icon.classList.replace(mostrar ? 'bi-eye' : 'bi-eye-slash', mostrar ? 'bi-eye-slash' : 'bi-eye');
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

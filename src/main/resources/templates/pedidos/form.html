@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Pedido</title>
+</head>
+<body>
+
+<div th:fragment="content">
+
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a th:href="${pedidoEmEdicao != null} ? @{/pedidos/{id}(id=${pedidoEmEdicao.id})} : @{/pedidos}"
+           class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+        <h2 class="fw-bold mb-0"
+            th:text="${pedidoEmEdicao != null} ? ('Editar pedido #' + ${pedidoEmEdicao.codigo}) : 'Novo pedido'"></h2>
+    </div>
+
+    <div class="card shadow-sm" style="max-width: 760px;">
+        <div class="card-body p-4">
+
+            <form th:action="${pedidoEmEdicao != null} ? @{/pedidos/{id}/editar(id=${pedidoEmEdicao.id})} : @{/pedidos/novo}"
+                  th:object="${pedidoForm}" method="post">
+
+                <div class="mb-3">
+                    <label for="clienteId" class="form-label fw-medium"><i class="bi bi-person me-1"></i>Cliente</label>
+                    <select id="clienteId" class="form-select" th:field="*{clienteId}" required>
+                        <option value="">Selecione...</option>
+                        <option th:each="c : ${clientes}" th:value="${c.id}"
+                                th:text="${c.nome} + ' — ' + ${c.telefone}"></option>
+                    </select>
+                    <div class="form-text" th:if="${#lists.isEmpty(clientes)}">
+                        Nenhum cliente cadastrado. Cadastre em <a href="/clientes/novo">Clientes</a>.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <span class="form-label fw-medium d-block">Atendimento</span>
+                    <div class="form-check form-check-inline" th:each="t : ${tiposAtendimento}">
+                        <input class="form-check-input" type="radio" th:field="*{tipoAtendimento}" th:value="${t}" required>
+                        <label class="form-check-label" th:for="${#ids.prev('tipoAtendimento')}" th:text="${t.rotulo}"></label>
+                    </div>
+                </div>
+
+                <hr>
+                <p class="fw-medium mb-2"><i class="bi bi-list-ul me-1"></i>Itens</p>
+                <p class="small text-muted">Os preços vêm do cardápio e o total é calculado pelo servidor ao salvar.</p>
+
+                <div id="linhas">
+                    <div class="row g-2 mb-2 linha-item" th:each="linha, st : *{itens}">
+                        <div class="col-8">
+                            <select class="form-select" th:field="*{itens[__${st.index}__].produtoId}">
+                                <option value="">— produto —</option>
+                                <option th:each="p : ${produtos}" th:value="${p.id}"
+                                        th:text="${p.nome} + ' (' + ${@fmt.moeda(p.preco)} + ')'"></option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <input type="number" class="form-control" min="1" max="50"
+                                   th:field="*{itens[__${st.index}__].quantidade}" placeholder="qtd">
+                        </div>
+                        <div class="col-1 d-flex align-items-center">
+                            <button type="button" class="btn btn-sm btn-outline-danger remover" title="Remover linha">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="adicionar" class="btn btn-sm btn-outline-secondary mb-3">
+                    <i class="bi bi-plus"></i> Adicionar item
+                </button>
+
+                <div class="mb-4">
+                    <label for="observacao" class="form-label fw-medium">Observação</label>
+                    <input type="text" id="observacao" class="form-control" th:field="*{observacao}"
+                           maxlength="300" placeholder="Ex.: sem cebola, troco para 100">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        <span th:text="${pedidoEmEdicao != null} ? 'Salvar alterações' : 'Registrar pedido'"></span>
+                    </button>
+                    <a th:href="@{/pedidos}" class="btn btn-outline-secondary">Voltar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Adicionar/remover linhas de item. Os nomes dos campos seguem o padrão itens[0].produtoId,
+        // então após cada mudança os índices são renumerados para o Spring montar a lista.
+        (function () {
+            const container = document.getElementById('linhas');
+
+            function renumerar() {
+                container.querySelectorAll('.linha-item').forEach((linha, i) => {
+                    linha.querySelectorAll('select, input').forEach(campo => {
+                        campo.name = campo.name.replace(/itens\[\d+\]/, 'itens[' + i + ']');
+                        campo.id = campo.name.replace(/[\[\].]/g, '');
+                    });
+                });
+            }
+
+            document.getElementById('adicionar').addEventListener('click', () => {
+                const modelo = container.querySelector('.linha-item');
+                const nova = modelo.cloneNode(true);
+                nova.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+                nova.querySelectorAll('input').forEach(i => i.value = '');
+                container.appendChild(nova);
+                renumerar();
+            });
+
+            container.addEventListener('click', (ev) => {
+                const botao = ev.target.closest('.remover');
+                if (!botao) return;
+                const linhas = container.querySelectorAll('.linha-item');
+                if (linhas.length > 1) {
+                    botao.closest('.linha-item').remove();
+                    renumerar();
+                } else {
+                    linhas[0].querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+                    linhas[0].querySelectorAll('input').forEach(i => i.value = '');
+                }
+            });
+        })();
+    </script>
+
+</div>
+
+</body>
+</html>
