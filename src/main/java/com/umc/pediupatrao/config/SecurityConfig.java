@@ -27,8 +27,8 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  *     mesmo que alguem crie outra rota chamando o mesmo metodo.
  *
  * Matriz de permissoes:
- *  - ADMIN     : usuarios/perfis, consulta de pedidos, auditoria
- *  - GERENTE   : pedidos (inclusive desconto e cancelamento), consulta de clientes, produtos, auditoria
+ *  - ADMIN     : usuarios/perfis, consulta de pedidos, auditoria, dashboard
+ *  - GERENTE   : pedidos (inclusive desconto e cancelamento), consulta de clientes, produtos, auditoria, dashboard
  *  - ATENDENTE : cadastro/alteracao de clientes, registro e andamento de pedidos
  */
 @Configuration
@@ -83,6 +83,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/auditoria", "/auditoria/**", "/api/auditoria", "/api/auditoria/**")
                             .hasAnyRole("ADMIN", "GERENTE")
                         .requestMatchers("/auditoria", "/auditoria/**", "/api/auditoria", "/api/auditoria/**").denyAll()
+
+                        // Dashboard administrativo: somente leitura, para ADMIN e GERENTE
+                        .requestMatchers(HttpMethod.GET, "/dashboard", "/api/dashboard", "/api/dashboard/**")
+                            .hasAnyRole("ADMIN", "GERENTE")
+                        .requestMatchers("/dashboard", "/dashboard/**", "/api/dashboard", "/api/dashboard/**").denyAll()
 
                         // Exclusivo do GERENTE (nem o ADMIN pode)
                         .requestMatchers("/pedidos/*/desconto", "/pedidos/*/cancelar",

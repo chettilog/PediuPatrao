@@ -45,7 +45,8 @@ public class Pedido {
     @Indexed
     private StatusPedido status;
 
-    // Entrada
+    // Entrada (indexado: o dashboard filtra os pedidos por periodo de entrada)
+    @Indexed
     private LocalDateTime entradaEm;
     private String registradoPor;
 
