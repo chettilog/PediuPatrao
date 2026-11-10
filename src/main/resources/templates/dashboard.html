@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+
+<!--
+    Dashboard administrativo (ADMIN e GERENTE).
+    Esta pagina so tem a estrutura: todos os numeros vem da API /api/dashboard/**,
+    carregados por static/js/dashboard.js. Assim a mesma API serve a tela, testes e outros clientes.
+-->
+<div th:fragment="content" id="dashboard" class="pb-5">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+
+    <!-- Cabecalho -->
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h2>
+            <div class="text-secondary small" id="db-periodo-texto">Carregando…</div>
+        </div>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span class="small text-secondary" id="db-atualizado" aria-live="polite"></span>
+            <div class="form-check form-switch mb-0" title="Recarrega os dados a cada 60 segundos">
+                <input class="form-check-input" type="checkbox" role="switch" id="db-auto" checked>
+                <label class="form-check-label small" for="db-auto">Atualizar sozinho</label>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="db-atualizar">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- RF05 - filtros (uma linha, valem para todo o painel) -->
+    <form class="card card-body db-filtros mb-3" id="db-form" autocomplete="off">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-xl-auto">
+                <span class="form-label small d-block mb-1">Período</span>
+                <div class="btn-group btn-group-sm flex-wrap" role="group" aria-label="Períodos rápidos" id="db-presets">
+                    <button type="button" class="btn btn-outline-secondary" data-preset="hoje">Hoje</button>
+                    <button type="button" class="btn btn-outline-secondary" data-preset="7">7 dias</button>
+                    <button type="button" class="btn btn-outline-secondary" data-preset="30">30 dias</button>
+                    <button type="button" class="btn btn-outline-secondary" data-preset="90">90 dias</button>
+                    <button type="button" class="btn btn-outline-secondary" data-preset="mes">Este mês</button>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-xl-2">
+                <label class="form-label small mb-1" for="db-inicio">De</label>
+                <input type="date" class="form-control form-control-sm" id="db-inicio" name="inicio">
+            </div>
+            <div class="col-6 col-md-3 col-xl-2">
+                <label class="form-label small mb-1" for="db-fim">Até</label>
+                <input type="date" class="form-control form-control-sm" id="db-fim" name="fim">
+            </div>
+            <div class="col-6 col-md-3 col-xl-2">
+                <label class="form-label small mb-1" for="db-tipo">Atendimento</label>
+                <select class="form-select form-select-sm" id="db-tipo" name="tipoAtendimento">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-xl-2">
+                <label class="form-label small mb-1" for="db-status">Status</label>
+                <select class="form-select form-select-sm" id="db-status" name="status">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="col-12 col-xl-auto d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel"></i> Aplicar</button>
+                <button type="button" class="btn btn-link btn-sm text-secondary" id="db-limpar">Limpar</button>
+            </div>
+        </div>
+        <div class="invalid-feedback d-block small mt-2" id="db-erro-filtro" hidden></div>
+    </form>
+
+    <!-- RF07 - erro geral de comunicacao com a API -->
+    <div class="alert alert-danger d-flex align-items-center gap-2" id="db-erro" role="alert" hidden>
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span id="db-erro-texto">Não foi possível carregar os dados.</span>
+        <button type="button" class="btn btn-sm btn-outline-danger ms-auto" id="db-tentar">Tentar de novo</button>
+    </div>
+
+    <!-- RF01 - indicadores gerais -->
+    <div class="row g-3 mb-3" id="db-kpis" aria-live="polite"><!-- montado pelo dashboard.js --></div>
+
+    <!-- RF02 - vendas no periodo | RF03 - situacao -->
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-xl-8">
+            <section class="card h-100 db-bloco" id="bloco-vendas" aria-labelledby="titulo-vendas">
+                <div class="card-header d-flex flex-wrap align-items-center gap-2">
+                    <h5 class="mb-0 me-auto" id="titulo-vendas">Vendas no período</h5>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Medida">
+                        <input type="radio" class="btn-check" name="db-medida" id="db-medida-fat" value="faturamento" checked>
+                        <label class="btn btn-outline-secondary" for="db-medida-fat">Faturamento</label>
+                        <input type="radio" class="btn-check" name="db-medida" id="db-medida-ped" value="pedidos">
+                        <label class="btn btn-outline-secondary" for="db-medida-ped">Pedidos</label>
+                    </div>
+                    <select class="form-select form-select-sm w-auto" id="db-agrupamento" aria-label="Agrupamento">
+                        <option value="DIA">Por dia</option>
+                        <option value="SEMANA">Por semana</option>
+                        <option value="MES">Por mês</option>
+                    </select>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="db-vendas-tabela"
+                            aria-pressed="false" title="Ver os números em tabela"><i class="bi bi-table"></i></button>
+                </div>
+                <div class="card-body">
+                    <div class="small text-secondary mb-2" id="db-vendas-total"></div>
+                    <div class="db-grafico db-grafico-alto"><canvas id="graf-vendas" role="img" aria-label="Gráfico de vendas no período"></canvas></div>
+                    <div class="db-vazio" hidden>Nenhuma venda no período.</div>
+                    <div class="table-responsive db-tabela-vendas mt-2" hidden></div>
+                </div>
+            </section>
+        </div>
+        <div class="col-12 col-xl-4">
+            <section class="card h-100 db-bloco" id="bloco-status" aria-labelledby="titulo-status">
+                <div class="card-header"><h5 class="mb-0" id="titulo-status">Situação dos pedidos</h5></div>
+                <div class="card-body">
+                    <div class="small text-secondary mb-2" id="db-status-total"></div>
+                    <ul class="list-unstyled mb-0 db-barras" id="db-status-lista"></ul>
+                    <div class="db-vazio" hidden>Nenhum pedido no período.</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- RF02 - distribuicoes -->
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-lg-6 col-xl-5">
+            <section class="card h-100 db-bloco" id="bloco-hora" aria-labelledby="titulo-hora">
+                <div class="card-header"><h5 class="mb-0" id="titulo-hora">Pedidos por horário</h5></div>
+                <div class="card-body">
+                    <div class="small text-secondary mb-2" id="db-pico"></div>
+                    <div class="db-grafico"><canvas id="graf-hora" role="img" aria-label="Pedidos por hora do dia"></canvas></div>
+                    <div class="db-vazio" hidden>Sem dados no período.</div>
+                </div>
+            </section>
+        </div>
+        <div class="col-12 col-lg-6 col-xl-3">
+            <section class="card h-100 db-bloco" id="bloco-semana" aria-labelledby="titulo-semana">
+                <div class="card-header"><h5 class="mb-0" id="titulo-semana">Dia da semana</h5></div>
+                <div class="card-body">
+                    <div class="small text-secondary mb-2" id="db-melhor-dia"></div>
+                    <div class="db-grafico"><canvas id="graf-semana" role="img" aria-label="Faturamento por dia da semana"></canvas></div>
+                    <div class="db-vazio" hidden>Sem dados no período.</div>
+                </div>
+            </section>
+        </div>
+        <div class="col-12 col-xl-4">
+            <section class="card h-100 db-bloco" id="bloco-mix" aria-labelledby="titulo-mix">
+                <div class="card-header"><h5 class="mb-0" id="titulo-mix">Atendimento e categorias</h5></div>
+                <div class="card-body">
+                    <div class="db-segmentos mb-1" id="db-tipo-barra" aria-hidden="true"></div>
+                    <ul class="list-inline small mb-3 db-legenda" id="db-tipo-legenda"></ul>
+                    <div class="small fw-semibold mb-1" id="db-cat-titulo">Faturamento por categoria</div>
+                    <ul class="list-unstyled mb-0 db-barras" id="db-categorias"></ul>
+                    <div class="db-vazio" hidden>Sem dados no período.</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- RF04 - produtos | RF03 - fila atual -->
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-xl-6">
+            <section class="card h-100 db-bloco" id="bloco-produtos" aria-labelledby="titulo-produtos">
+                <div class="card-header d-flex flex-wrap align-items-center gap-2">
+                    <h5 class="mb-0 me-auto" id="titulo-produtos">Produtos mais vendidos</h5>
+                    <select class="form-select form-select-sm w-auto" id="db-categoria" aria-label="Categoria">
+                        <option value="">Todas as categorias</option>
+                    </select>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Ordenar por">
+                        <input type="radio" class="btn-check" name="db-criterio" id="db-crit-qtd" value="QUANTIDADE" checked>
+                        <label class="btn btn-outline-secondary" for="db-crit-qtd">Quantidade</label>
+                        <input type="radio" class="btn-check" name="db-criterio" id="db-crit-fat" value="FATURAMENTO">
+                        <label class="btn btn-outline-secondary" for="db-crit-fat">Faturamento</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ol class="list-unstyled mb-0 db-barras db-ranking" id="db-ranking"></ol>
+                    <div class="db-vazio" hidden>Nenhum produto vendido no período.</div>
+                </div>
+            </section>
+        </div>
+        <div class="col-12 col-xl-6">
+            <section class="card h-100 db-bloco" id="bloco-fila" aria-labelledby="titulo-fila">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <h5 class="mb-0 me-auto" id="titulo-fila">Fila agora</h5>
+                    <span class="small text-secondary" id="db-fila-resumo"></span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive db-fila-scroll">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr><th class="ps-3">Pedido</th><th>Cliente</th><th>Status</th><th class="text-end">Tempo</th><th class="text-end pe-3">Total</th></tr>
+                            </thead>
+                            <tbody id="db-fila"></tbody>
+                        </table>
+                    </div>
+                    <div class="db-vazio p-3" hidden>Nenhum pedido em andamento.</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- RF03/RF05 - pedidos do periodo -->
+    <section class="card db-bloco" id="bloco-pedidos" aria-labelledby="titulo-pedidos">
+        <div class="card-header d-flex align-items-center gap-2">
+            <h5 class="mb-0 me-auto" id="titulo-pedidos">Pedidos do período</h5>
+            <span class="small text-secondary" id="db-pedidos-info"></span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Pedido</th><th>Entrada</th><th>Cliente</th><th>Atendimento</th>
+                            <th>Status</th><th class="text-end">Itens</th><th class="text-end">Desconto</th><th class="text-end pe-3">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-pedidos"></tbody>
+                </table>
+            </div>
+            <div class="db-vazio p-3" hidden>Nenhum pedido no período.</div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="db-pag-ant" disabled>&laquo; Anterior</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="db-pag-prox" disabled>Próxima &raquo;</button>
+        </div>
+    </section>
+
+    <script th:src="@{/js/vendor/chart-4.6.1.umd.min.js}"></script>
+    <script th:src="@{/js/dashboard.js}"></script>
+</div>
+
+</body>
+</html>
