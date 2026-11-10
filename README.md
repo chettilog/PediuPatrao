@@ -1,7 +1,24 @@
-# PediuPatrão - Atividade Prática M1 (Parte 2)
+# PediuPatrão - Sistema de Pedidos (UMC)
 
 Aluno: Joao Pedro Marchetti
 RGM: 11231102996
+
+## Atividade: Dashboard Administrativo
+
+[![CI](https://github.com/chettilog/PediuPatrao/actions/workflows/ci.yml/badge.svg)](https://github.com/chettilog/PediuPatrao/actions/workflows/ci.yml)
+
+Painel para o gerente/administrador acompanhar vendas, pedidos e tendências, alimentado por uma API própria (`/api/dashboard/**`).
+
+- **Documentação completa** (requisitos, endpoints, evidências de testes e decisões de projeto): [docs/DASHBOARD.md](docs/DASHBOARD.md)
+- **Roteiro do vídeo:** [docs/ROTEIRO-VIDEO.md](docs/ROTEIRO-VIDEO.md)
+- **Acesso:** entrar com `gerente01` ou `admin` e clicar em **Dashboard** no menu.
+- **Dados para os gráficos:** na primeira execução, rode com `set PEDIUPATRAO_GERAR_PEDIDOS=true` para criar 90 dias de pedidos de demonstração.
+
+![Dashboard](docs/evidencias/01-dashboard-completo.png)
+
+---
+
+## Atividade anterior: perfis, pedidos e auditoria (M1 Parte 2)
 
 Esse projeto é a evolução do sistema de pedidos da pizzaria PediuPatrão. A ideia foi separar o que cada funcionário pode fazer, controlar o caminho do pedido (da entrada até a saída) e guardar um histórico de quem mudou o quê. Mantive a base que veio no projeto: Java 21, Spring Boot 3.4, Spring Security, Spring Data MongoDB e Thymeleaf.
 
