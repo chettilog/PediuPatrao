@@ -1,0 +1,6 @@
+GET /api/dashboard/resumo?inicio=2026-11-10&fim=2026-11-01 -> {"status":400,"erro":"A data inicial não pode ser posterior à data final."} [HTTP 400]
+GET /api/dashboard/resumo?inicio=2024-01-01&fim=2026-11-10 -> {"status":400,"erro":"O período consultado pode ter no máximo 366 dias."} [HTTP 400]
+GET /api/dashboard/resumo?inicio=10/11/2026 -> {"status":400,"erro":"Requisição inválida: verifique os campos e valores enviados."} [HTTP 400]
+GET /api/dashboard/vendas?agrupamento=ANO -> {"status":400,"erro":"Requisição inválida: verifique os campos e valores enviados."} [HTTP 400]
+GET /api/dashboard/pedidos?tamanho=500 -> {"status":400,"erro":"O parâmetro 'tamanho' deve ficar entre 1 e 100."} [HTTP 400]
+GET /api/dashboard/produtos/mais-vendidos?limite=0 -> {"status":400,"erro":"O parâmetro 'limite' deve ficar entre 1 e 50."} [HTTP 400]
