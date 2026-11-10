@@ -1,0 +1,68 @@
+/* Dashboard administrativo. Cores por papel (nao por valor solto), no topo do arquivo. */
+#dashboard {
+    --db-superficie: #fcfcfb;
+    --db-texto: #0b0b0b;
+    --db-texto-2: #52514e;
+    --db-texto-mudo: #898781;
+    --db-grade: #e1e0d9;
+    --db-eixo: #c3c2b7;
+    --db-serie-1: #2a78d6;   /* azul: medida principal */
+    --db-serie-1-trilha: #cde2fb;
+    --db-serie-2: #eb6834;   /* laranja: segunda categoria (retirada) */
+    --db-bom: #006300;
+    --db-ruim: #d03b3b;
+    --db-alerta: #fab219;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+/* [hidden] precisa vencer utilitarios do Bootstrap como .d-flex, que usam !important */
+#dashboard [hidden] { display: none !important; }
+
+#dashboard .card { border-color: rgba(11, 11, 11, 0.10); }
+#dashboard .card-header { background: var(--db-superficie); border-bottom-color: rgba(11, 11, 11, 0.08); }
+#dashboard .card-header h5 { font-size: 1rem; font-weight: 600; }
+
+/* ---------- indicadores (stat tiles) ---------- */
+.db-kpi .card-body { padding: .9rem 1rem; }
+.db-kpi-rotulo { font-size: .8rem; color: var(--db-texto-2); }
+.db-kpi-valor { font-size: 1.55rem; font-weight: 600; color: var(--db-texto); line-height: 1.2; margin: .15rem 0; white-space: nowrap; }
+.db-kpi-delta { font-size: .78rem; color: var(--db-texto-2); min-height: 1.1rem; }
+.db-kpi-delta .bom { color: var(--db-bom); font-weight: 600; }
+.db-kpi-delta .ruim { color: var(--db-ruim); font-weight: 600; }
+.db-kpi-extra { font-size: .75rem; color: var(--db-texto-mudo); }
+
+/* ---------- graficos ---------- */
+.db-grafico { position: relative; height: 220px; }
+.db-grafico-alto { height: 280px; }
+.db-vazio { color: var(--db-texto-mudo); text-align: center; padding: 2.5rem 0; font-size: .9rem; }
+.db-bloco.carregando .card-body { opacity: .45; transition: opacity .15s; }
+
+/* ---------- barras em HTML (status, categorias, ranking) ---------- */
+.db-barras li { display: grid; grid-template-columns: minmax(0, 9.5rem) 1fr auto; gap: .6rem; align-items: center; padding: .28rem 0; font-size: .86rem; }
+.db-barras .nome { color: var(--db-texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.db-barras .trilha { height: 10px; background: transparent; position: relative; }
+.db-barras .barra { height: 10px; background: var(--db-serie-1); border-radius: 0 4px 4px 0; min-width: 2px; }
+.db-barras .valor { color: var(--db-texto); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.db-barras .valor small { color: var(--db-texto-mudo); margin-left: .35rem; }
+.db-ranking li { grid-template-columns: 1.6rem minmax(0, 12rem) 1fr auto; }
+.db-ranking .pos { color: var(--db-texto-mudo); font-variant-numeric: tabular-nums; text-align: right; }
+.db-ranking .cat { display: block; font-size: .72rem; color: var(--db-texto-mudo); }
+.db-barras li.zerado .nome { color: var(--db-texto-mudo); }
+
+/* segmentos entrega x retirada: 2px de superficie separando as partes */
+.db-segmentos { display: flex; gap: 2px; height: 14px; }
+.db-segmentos span { display: block; height: 100%; min-width: 2px; }
+.db-segmentos span:first-child { border-radius: 4px 0 0 4px; }
+.db-segmentos span:last-child { border-radius: 0 4px 4px 0; }
+.db-segmentos span:only-child { border-radius: 4px; }
+.db-legenda li { margin-right: 1rem; color: var(--db-texto-2); }
+.db-legenda .chave { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: .35rem; vertical-align: -1px; }
+
+/* ---------- tabelas ---------- */
+#dashboard table td, #dashboard table th { font-size: .85rem; }
+#dashboard td.num, #dashboard th.num { font-variant-numeric: tabular-nums; text-align: right; }
+.db-fila-scroll { max-height: 360px; overflow-y: auto; }
+.db-atraso { color: var(--db-texto); font-weight: 600; white-space: nowrap; }
+.db-atraso i { color: var(--db-ruim); }
+.db-filtros .btn-group .btn.active { background: var(--db-texto-2); color: #fff; border-color: var(--db-texto-2); }

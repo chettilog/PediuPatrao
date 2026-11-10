@@ -35,6 +35,11 @@ public class TratamentoErrosApi {
         return corpo(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler(ParametroInvalidoException.class)
+    public ResponseEntity<Map<String, Object>> parametroInvalido(ParametroInvalidoException e) {
+        return corpo(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class})
     public ResponseEntity<Map<String, Object>> requisicaoInvalida(Exception e) {
