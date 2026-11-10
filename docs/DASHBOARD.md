@@ -358,9 +358,9 @@ Rodam com `mvnw test` e no GitHub Actions (`.github/workflows/ci.yml`) a cada pu
 | `GeradorPedidosDemoTest` | Dados de demonstração respeitam o cálculo de valores, o limite de 20% de desconto e o fluxo de status; nada no futuro | 3 |
 | `DashboardApiTest` | 401 sem login; 403 para ATENDENTE e para POST; 200 para GERENTE e ADMIN; 400 com mensagem para datas invertidas, formato errado, enum inválido e limites de paginação/ranking | 9 |
 
-Resultado da execução dos testes de lógica: [`evidencias/testes-logica.txt`](evidencias/testes-logica.txt) (30 de 30 passando).
+**Resultado no GitHub Actions (10/11/2026):** 90 testes do projeto (51 anteriores + 39 do dashboard), 0 falhas, `BUILD SUCCESS`.
 
-> **Para completar esta seção:** rode `mvnw test` e cole aqui o trecho final (`Tests run: …, Failures: 0`), ou um print da aba **Actions** do GitHub com o CI verde.
+![CI no GitHub Actions: 90 testes, 0 falhas](evidencias/10-ci-testes-github.png)
 
 ### 4.2 Validações da API (chamadas reais)
 
