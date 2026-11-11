@@ -10,7 +10,6 @@ RGM: 11231102996
 Painel para o gerente/administrador acompanhar vendas, pedidos e tendências, alimentado por uma API própria (`/api/dashboard/**`).
 
 - **Documentação completa** (requisitos, endpoints, evidências de testes e decisões de projeto): [docs/DASHBOARD.md](docs/DASHBOARD.md)
-- **Roteiro do vídeo:** [docs/ROTEIRO-VIDEO.md](docs/ROTEIRO-VIDEO.md)
 - **Acesso:** entrar com `gerente01` ou `admin` e clicar em **Dashboard** no menu.
 - **Dados para os gráficos:** na primeira execução, rode com `set PEDIUPATRAO_GERAR_PEDIDOS=true` para criar 90 dias de pedidos de demonstração.
 
